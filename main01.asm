@@ -1,33 +1,37 @@
-﻿.386
+.386
 
-dseg segment use16 
-    a db 12h
-    b db 34h
-    c db 56h
-    d db 78h
-    e db 90h
-    f dw 0FFFBh
-    symb db 'T', 'B', 'O'
+; Исходные данные
+dseg segment use16
+    arr  db 12h, 34h, 56h, 78h, 90h
+    code dw 0FFFBh
+    symb db 'TBO'
 dseg ends
+
+; Результаты
 eseg segment use16
-    j db ?
-    k db ?
-    l db ?
+    res db ?, ?, ?
 eseg ends
+
 cseg segment use16
 assume ds:dseg, es:eseg, cs:cseg
-m1:
-    mov cx, dseg
-    mov ds, cx
-    mov cx, eseg
-    mov es, cx
-    mov al, ds:c
-    mov es:j, al
-    mov ah, ds:f+1
-    mov es:k, ah
-    mov bl, ds:symb+2
-    mov es:h, bl
+m:  mov ax, dseg
+    mov ds, ax
+    mov ax, eseg
+    mov es, ax
+
+    ; Пересылка 3-го однобайтного кода
+    mov al, ds:arr+2
+    mov es:res, al
+
+    ; Пересылка старшего байта слова
+    mov al, byte ptr ds:code+1
+    mov es:res+1, al
+
+    ; Пересылка 3-го символа
+    mov al, ds:symb+2
+    mov es:res+2, al
+    
     mov ah, 4ch
     int 21h
 cseg ends
-end m1
+end m
